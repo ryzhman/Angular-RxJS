@@ -13,23 +13,14 @@ import {SupplierService} from '../suppliers/supplier.service';
 export class ProductService {
   private productsUrl = 'api/products';
   private suppliersUrl = this.supplierService.suppliersUrl;
+  products$: Observable<Product[]> = this.http.get<Product[]>(this.productsUrl)
+    .pipe(
+      tap(data => console.log('Products: ', JSON.stringify(data))),
+      catchError(this.handleError)
+    );
 
   constructor(private http: HttpClient,
               private supplierService: SupplierService) {
-  }
-
-  getProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(this.productsUrl)
-      .pipe(
-        tap(data => console.log('Products: ', JSON.stringify(data))),
-        // map(data => {
-        //   if (data) {
-        //     return throwError('Intentional error');
-        //   }
-        // }),
-        // creates and Observable with no elements + throw an error
-        catchError(this.handleError)
-      );
   }
 
   private fakeProduct(): Product {

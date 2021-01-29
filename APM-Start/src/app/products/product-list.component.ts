@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 
 import {EMPTY, Observable, Subscription} from 'rxjs';
 
@@ -12,28 +12,23 @@ import {catchError} from "rxjs/operators";
   // changes the component only when the @Input has changed, event is emitted or Observable update
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProductListComponent implements OnInit {
+export class ProductListComponent {
   pageTitle = 'Product List';
   errorMessage = '';
   categories;
 
   sub: Subscription;
   // $ for marking it is an Observable
-  products$: Observable<Product[]>;
+  products$: Observable<Product[]> = this.productService.products$
+    .pipe(catchError(error => {
+      //     // with onpush this change will not be picked up by component
+      this.errorMessage = error;
+      //     // if error happened, we will return an empty observable
+      //     // otherwise, the error is propagated to the template
+      return EMPTY;
+    }));
 
   constructor(private productService: ProductService) {
-  }
-
-  ngOnInit(): void {
-    this.products$ = this.productService.getProducts().pipe(
-      catchError(error => {
-        // with onpush this change will not be picked up by component
-        this.errorMessage = error;
-        // if error happened, we will return an empty observable
-        // otherwise, the error is propagated to the template
-        return EMPTY;
-      })
-    );
   }
 
   onAdd(): void {
