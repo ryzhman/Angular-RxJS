@@ -1,34 +1,37 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 
-import { Subscription } from 'rxjs';
+import {EMPTY, Observable, Subscription} from 'rxjs';
 
-import { Product } from './product';
-import { ProductService } from './product.service';
+import {Product} from './product';
+import {ProductService} from './product.service';
+import {catchError} from "rxjs/operators";
 
 @Component({
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit, OnDestroy {
+export class ProductListComponent implements OnInit {
   pageTitle = 'Product List';
   errorMessage = '';
   categories;
 
-  products: Product[] = [];
   sub: Subscription;
+  // $ for marking it is an Observable
+  products$: Observable<Product[]>;
 
-  constructor(private productService: ProductService) { }
-
-  ngOnInit(): void {
-    this.sub = this.productService.getProducts()
-      .subscribe(
-        products => this.products = products,
-        error => this.errorMessage = error
-      );
+  constructor(private productService: ProductService) {
   }
 
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
+  ngOnInit(): void {
+    this.products$ = this.productService.getProducts().pipe(
+      catchError(error => {
+        // with onpush this change will not be picked up by component
+        this.errorMessage = error;
+        // if error happened, we will return an empty observable
+        // otherwise, the error is propagated to the template
+        return EMPTY;
+      })
+    );
   }
 
   onAdd(): void {
