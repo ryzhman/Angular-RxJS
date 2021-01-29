@@ -8,7 +8,9 @@ import {catchError} from "rxjs/operators";
 
 @Component({
   templateUrl: './product-list.component.html',
-  styleUrls: ['./product-list.component.css']
+  styleUrls: ['./product-list.component.css'],
+  // changes the component only when the @Input has changed, event is emitted or Observable update
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductListComponent implements OnInit {
   pageTitle = 'Product List';
