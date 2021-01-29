@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 
-import {EMPTY, Observable, Subscription} from 'rxjs';
+import {EMPTY, Observable, Subject, Subscription} from 'rxjs';
 
 import {Product} from './product';
 import {ProductService} from './product.service';
@@ -14,7 +14,8 @@ import {catchError} from "rxjs/operators";
 })
 export class ProductListComponent {
   pageTitle = 'Product List';
-  errorMessage = '';
+  private errorMessageSubject: Subject<string> = new Subject<string>();
+  errorMessage = this.errorMessageSubject.asObservable();
   categories;
 
   sub: Subscription;
@@ -22,7 +23,7 @@ export class ProductListComponent {
   products$: Observable<Product[]> = this.productService.products$
     .pipe(catchError(error => {
       //     // with onpush this change will not be picked up by component
-      this.errorMessage = error;
+      this.errorMessageSubject.next(error);
       //     // if error happened, we will return an empty observable
       //     // otherwise, the error is propagated to the template
       return EMPTY;
