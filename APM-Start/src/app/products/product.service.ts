@@ -16,14 +16,13 @@ export class ProductService {
   products$ = this.http.get<Product[]>(this.productsUrl)
     .pipe(
       map(items => items
+        // ... is spread operator
         .map(product => ({
-          id: product.id,
+          ...product,
           price: product.price * 1.5,
-          productName: product.productName,
-          productCode: product.productCode,
-          description: product.description,
-          searchKey: product.searchKey
-        }) as Product)),
+          searchKey: [product.productName]
+        }) as Product)
+      ),
       tap(data => console.log('Products: ', JSON.stringify(data))),
       catchError(this.handleError)
     );
