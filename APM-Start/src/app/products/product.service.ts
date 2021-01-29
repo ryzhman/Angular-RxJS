@@ -13,13 +13,17 @@ import {SupplierService} from '../suppliers/supplier.service';
 export class ProductService {
   private productsUrl = 'api/products';
   private suppliersUrl = this.supplierService.suppliersUrl;
-  products$: Observable<Product[]> = this.http.get<Product[]>(this.productsUrl)
+  products$ = this.http.get<Product[]>(this.productsUrl)
     .pipe(
       map(items => items
-        .map(product => {
-          product.price *= 1.5;
-          return product;
-        })),
+        .map(product => ({
+          id: product.id,
+          price: product.price * 1.5,
+          productName: product.productName,
+          productCode: product.productCode,
+          description: product.description,
+          searchKey: product.searchKey
+        }) as Product)),
       tap(data => console.log('Products: ', JSON.stringify(data))),
       catchError(this.handleError)
     );
