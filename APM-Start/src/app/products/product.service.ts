@@ -1,11 +1,13 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 
-import {Observable, throwError} from 'rxjs';
+import {forkJoin, Observable, throwError} from 'rxjs';
 import {catchError, map, tap} from 'rxjs/operators';
 
 import {Product} from './product';
 import {SupplierService} from '../suppliers/supplier.service';
+import {ProductCategory} from '../product-categories/product-category';
+import {ProductCategoryService} from '../product-categories/product-category.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,22 +15,38 @@ import {SupplierService} from '../suppliers/supplier.service';
 export class ProductService {
   private productsUrl = 'api/products';
   private suppliersUrl = this.supplierService.suppliersUrl;
-  products$ = this.http.get<Product[]>(this.productsUrl)
-    .pipe(
-      map(items => items
-        // ... is spread operator
-        .map(product => ({
-          ...product,
-          price: product.price * 1.5,
-          searchKey: [product.productName]
-        }) as Product)
-      ),
-      tap(data => console.log('Products: ', JSON.stringify(data))),
-      catchError(this.handleError)
-    );
+  categories$ = this.productCategoryService.getAll();
+  products$ = this.http.get<Product[]>(this.productsUrl);
+  // alternative solution
+  // productsWithCategories$ = combineLatest([this.products$, this.categories$]);
+  // productsWithCategories$ = this.products$.pipe(withLatestFrom(this.categories$));
+  productsWithCategories$ = forkJoin([this.products$, this.categories$]).pipe(
+    tap(item => console.log(item)),
+    map(([products, categories]) => products
+      // ... is spread operator
+      .map(product => ({
+        ...product,
+        price: product.price * 1.5,
+        searchKey: [product.productName],
+        category: this.getCategory(product.categoryId, categories),
+      }) as Product)
+    ),
+    tap(data => console.log('Products: ', JSON.stringify(data))),
+    catchError(this.handleError),
+  );
+
+  getCategory(categoryId: number, categories: ProductCategory[]): string {
+    const productCategoryElement: ProductCategory = categories.find(item => item.id === categoryId);
+    return productCategoryElement?.name;
+    // this.productsWithCategories$.subscribe({
+    // next: item => console.log('This is combined stream: ' + JSON.stringify(item)),
+    // complete: () => console.log('Complete')
+    // });
+  }
 
   constructor(private http: HttpClient,
-              private supplierService: SupplierService) {
+              private supplierService: SupplierService,
+              private productCategoryService: ProductCategoryService) {
   }
 
   private fakeProduct(): Product {

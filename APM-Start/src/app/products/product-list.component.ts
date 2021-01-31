@@ -20,14 +20,15 @@ export class ProductListComponent {
 
   sub: Subscription;
   // $ for marking it is an Observable
-  products$: Observable<Product[]> = this.productService.products$
-    .pipe(catchError(error => {
-      //     // with onpush this change will not be picked up by component
-      this.errorMessageSubject.next(error);
-      //     // if error happened, we will return an empty observable
-      //     // otherwise, the error is propagated to the template
-      return EMPTY;
-    }));
+  products$: Observable<Product[]> = this.productService.productsWithCategories$
+    .pipe(
+      catchError(error => {
+        //     // with onpush this change will not be picked up by component
+        this.errorMessageSubject.next(error);
+        //     // if error happened, we will return an empty observable
+        //     // otherwise, the error is propagated to the template
+        return EMPTY;
+      }));
 
   constructor(private productService: ProductService) {
   }
