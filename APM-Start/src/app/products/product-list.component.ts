@@ -5,7 +5,7 @@ import {BehaviorSubject, combineLatest, EMPTY, Observable, Subject} from 'rxjs';
 import {Product} from './product';
 import {ProductService} from './product.service';
 import {ProductCategoryService} from '../product-categories/product-category.service';
-import {catchError, map, startWith, tap} from 'rxjs/operators';
+import {catchError, map} from 'rxjs/operators';
 
 @Component({
   templateUrl: './product-list.component.html',
@@ -27,14 +27,10 @@ export class ProductListComponent {
     this.categorySelectionAction$
   ])
     .pipe(
-      tap (item => console.log('Tap ' + item)),
       // data that each stream emits - 1st is product, 2nd - categoryId
       map(([products, categoryId]) =>
         products.filter(item => categoryId ? item.categoryId === categoryId : true)
       ),
-      tap(([products, selectedCategory]) => {
-        console.log(JSON.stringify(products));
-      }),
       catchError(err => {
         this.errorMessage = err;
         return EMPTY;
