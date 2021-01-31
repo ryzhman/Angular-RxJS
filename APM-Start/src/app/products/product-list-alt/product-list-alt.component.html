@@ -17,7 +17,8 @@
   </div>
 </div>
 
+<!--     'as' is required here to name the value emitted-->
 <div class="alert alert-danger"
-     *ngIf="errorMessage">
+     *ngIf="errorMessage | async as errorMessage">
   {{errorMessage}}
 </div>

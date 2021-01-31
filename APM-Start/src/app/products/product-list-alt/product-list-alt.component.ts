@@ -12,13 +12,13 @@ import {catchError} from 'rxjs/operators';
 })
 export class ProductListAltComponent {
   pageTitle = 'Products';
-  errorMessage = '';
-  selectedProductId: number;
+  private errorMessageSubject = new BehaviorSubject<string>('');
+  errorMessage = this.errorMessageSubject.asObservable();
 
   products$ = this.productService.productsWithCategories$
     .pipe(
       catchError(error => {
-        this.errorMessage = error;
+        this.errorMessageSubject.next(error);
         return EMPTY;
       })
     );
