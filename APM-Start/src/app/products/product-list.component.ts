@@ -23,7 +23,7 @@ export class ProductListComponent {
 
 // $ for marking it is an Observable
   products$: Observable<Product[]> = combineLatest([
-    this.productService.productsWithCategories$,
+    this.productService.productsWithAdd$,
     this.categorySelectionAction$
   ])
     .pipe(
@@ -41,7 +41,7 @@ export class ProductListComponent {
   }
 
   onAdd(): void {
-    console.log('Not yet implemented');
+    this.productService.publishNewProduct();
   }
 
   onSelected(categoryId: string): void {

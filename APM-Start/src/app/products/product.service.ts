@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 
-import {BehaviorSubject, combineLatest, forkJoin, Observable, throwError} from 'rxjs';
-import {catchError, map, tap} from 'rxjs/operators';
+import {BehaviorSubject, combineLatest, forkJoin, merge, Observable, Subject, throwError} from 'rxjs';
+import {catchError, map, scan, tap} from 'rxjs/operators';
 
 import {Product} from './product';
 import {SupplierService} from '../suppliers/supplier.service';
@@ -26,20 +26,35 @@ export class ProductService {
   // alternative solution
   // productsWithCategories$ = combineLatest([this.products$, this.categories$]);
   // productsWithCategories$ = this.products$.pipe(withLatestFrom(this.categories$));
-  productsWithCategories$ = forkJoin([this.products$, this.categories$]).pipe(
-    tap(item => console.log(item)),
-    map(([products, categories]) => products
-      // ... is spread operator
-      .map(product => ({
-        ...product,
-        price: product.price * 1.5,
-        searchKey: [product.productName],
-        category: this.getCategory(product.categoryId, categories),
-      }) as Product)
-    ),
-    tap(data => console.log('Products: ', JSON.stringify(data))),
-    catchError(this.handleError),
-  );
+  productsWithCategories$ = forkJoin([
+    this.products$,
+    this.categories$])
+    .pipe(
+      map(([products, categories]) => products
+        // ... is spread operator
+        .map(product => ({
+          ...product,
+          price: product.price * 1.5,
+          searchKey: [product.productName],
+          category: this.getCategory(product.categoryId, categories),
+        }) as Product)
+      ),
+      catchError(this.handleError)
+    );
+
+  private addProductSubject = new Subject<Product>();
+  addProduct$ = this.addProductSubject.asObservable();
+  // merging two streams together
+  productsWithAdd$ = merge(
+    this.productsWithCategories$,
+    this.addProduct$
+  )
+    .pipe(
+      // accumulator function that gets old value and adds a new one
+      scan((existingProducts: Product[], newProduct: Product) =>
+        // using spread operator instead of add()
+        [...existingProducts, newProduct]),
+    );
 
   private productSelectedSubject = new BehaviorSubject<number>(0);
   productSelected$ = this.productSelectedSubject.asObservable();
@@ -89,5 +104,9 @@ export class ProductService {
     }
     console.error(err);
     return throwError(errorMessage);
+  }
+
+  publishNewProduct(product?: Product): void {
+    this.addProductSubject.next(product || this.fakeProduct());
   }
 }
