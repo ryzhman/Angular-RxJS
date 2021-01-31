@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 
-import {combineLatest, EMPTY, Observable, Subject} from 'rxjs';
+import {BehaviorSubject, combineLatest, EMPTY, Observable, Subject} from 'rxjs';
 
 import {Product} from './product';
 import {ProductService} from './product.service';
@@ -17,8 +17,8 @@ export class ProductListComponent {
   pageTitle = 'Product List';
   private errorMessageSubject: Subject<string> = new Subject<string>();
   errorMessage = this.errorMessageSubject.asObservable();
-  private categorySelectedSubject = new Subject<number>();
-  categorySelectionAction$ = this.categorySelectedSubject.asObservable().pipe(startWith(0));
+  private categorySelectedSubject = new BehaviorSubject<number>(0);
+  categorySelectionAction$ = this.categorySelectedSubject.asObservable();
   categories$ = this.categoryService.getAll();
 
 // $ for marking it is an Observable
