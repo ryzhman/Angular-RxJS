@@ -1,19 +1,21 @@
-import {Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 
 import {EMPTY, Subscription} from 'rxjs';
 import {ProductService} from '../product.service';
-import {catchError} from "rxjs/operators";
+import {catchError} from 'rxjs/operators';
 
 @Component({
   selector: 'pm-product-list',
-  templateUrl: './product-list-alt.component.html'
+  templateUrl: './product-list-alt.component.html',
+  // since our component is now rendered based on Observable we can change the changeDetectionStrategy
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductListAltComponent {
   pageTitle = 'Products';
   errorMessage = '';
   selectedProductId: number;
 
-  products$ = this.productService.products$
+  products$ = this.productService.productsWithCategories$
     .pipe(
       catchError(error => {
         this.errorMessage = error;
@@ -26,6 +28,11 @@ export class ProductListAltComponent {
   }
 
   onSelected(productId: number): void {
-    console.log('Not yet implemented');
+    // this.products$.pipe(
+    //   tap(item => console.log(JSON.stringify(item))),
+    //   map(products =>
+    //     products.find(item => item.id === productId))
+    // ).subscribe((item) => this.product = item);
+    // this.productService.getById(productId);
   }
 }

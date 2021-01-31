@@ -13,6 +13,11 @@ import {ProductCategoryService} from '../product-categories/product-category.ser
   providedIn: 'root'
 })
 export class ProductService {
+
+  constructor(private http: HttpClient,
+              private supplierService: SupplierService,
+              private productCategoryService: ProductCategoryService) {
+  }
   private productsUrl = 'api/products';
   private suppliersUrl = this.supplierService.suppliersUrl;
   categories$ = this.productCategoryService.getAll();
@@ -35,6 +40,11 @@ export class ProductService {
     catchError(this.handleError),
   );
 
+  selectedProduct$ = this.productsWithCategories$.pipe(
+    map(products =>
+      products.find(item => item.id === 5))
+  );
+
   getCategory(categoryId: number, categories: ProductCategory[]): string {
     const productCategoryElement: ProductCategory = categories.find(item => item.id === categoryId);
     return productCategoryElement?.name;
@@ -42,11 +52,6 @@ export class ProductService {
     // next: item => console.log('This is combined stream: ' + JSON.stringify(item)),
     // complete: () => console.log('Complete')
     // });
-  }
-
-  constructor(private http: HttpClient,
-              private supplierService: SupplierService,
-              private productCategoryService: ProductCategoryService) {
   }
 
   private fakeProduct(): Product {
@@ -77,5 +82,4 @@ export class ProductService {
     console.error(err);
     return throwError(errorMessage);
   }
-
 }
