@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 
-import {EMPTY, Subscription} from 'rxjs';
+import {BehaviorSubject, EMPTY, Subscription} from 'rxjs';
 import {ProductService} from '../product.service';
 import {catchError} from 'rxjs/operators';
 
@@ -22,12 +22,13 @@ export class ProductListAltComponent {
         return EMPTY;
       })
     );
-  sub: Subscription;
+  selectedProduct$ = this.productService.selectedProduct$;
 
   constructor(private productService: ProductService) {
   }
 
   onSelected(productId: number): void {
+    this.productService.publishSelectProductChange(productId);
     // this.products$.pipe(
     //   tap(item => console.log(JSON.stringify(item))),
     //   map(products =>

@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 
-import {forkJoin, Observable, throwError} from 'rxjs';
+import {BehaviorSubject, combineLatest, forkJoin, Observable, throwError} from 'rxjs';
 import {catchError, map, tap} from 'rxjs/operators';
 
 import {Product} from './product';
@@ -18,6 +18,7 @@ export class ProductService {
               private supplierService: SupplierService,
               private productCategoryService: ProductCategoryService) {
   }
+
   private productsUrl = 'api/products';
   private suppliersUrl = this.supplierService.suppliersUrl;
   categories$ = this.productCategoryService.getAll();
@@ -40,10 +41,17 @@ export class ProductService {
     catchError(this.handleError),
   );
 
-  selectedProduct$ = this.productsWithCategories$.pipe(
-    map(products =>
-      products.find(item => item.id === 5))
+  private productSelectedSubject = new BehaviorSubject<number>(0);
+  productSelected$ = this.productSelectedSubject.asObservable();
+
+  selectedProduct$ = combineLatest([this.productsWithCategories$, this.productSelected$]).pipe(
+    map(([products, productSelectedId]) =>
+      products.find(item => item.id === productSelectedId))
   );
+
+  publishSelectProductChange(selectedProductId: number): void {
+    this.productSelectedSubject.next(selectedProductId);
+  }
 
   getCategory(categoryId: number, categories: ProductCategory[]): string {
     const productCategoryElement: ProductCategory = categories.find(item => item.id === categoryId);
