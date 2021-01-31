@@ -5,7 +5,7 @@ import {combineLatest, EMPTY, Observable, Subject} from 'rxjs';
 import {Product} from './product';
 import {ProductService} from './product.service';
 import {ProductCategoryService} from '../product-categories/product-category.service';
-import {catchError, map, tap} from 'rxjs/operators';
+import {catchError, map, startWith, tap} from 'rxjs/operators';
 
 @Component({
   templateUrl: './product-list.component.html',
@@ -18,7 +18,7 @@ export class ProductListComponent {
   private errorMessageSubject: Subject<string> = new Subject<string>();
   errorMessage = this.errorMessageSubject.asObservable();
   private categorySelectedSubject = new Subject<number>();
-  categorySelectionAction$ = this.categorySelectedSubject.asObservable();
+  categorySelectionAction$ = this.categorySelectedSubject.asObservable().pipe(startWith(0));
   categories$ = this.categoryService.getAll();
 
 // $ for marking it is an Observable
