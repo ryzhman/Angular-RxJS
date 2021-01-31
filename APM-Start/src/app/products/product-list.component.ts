@@ -41,10 +41,10 @@ export class ProductListComponent {
   }
 
   onSelected(categoryId: string): void {
-    if (+categoryId > 0) {
-      this.filteredProducts$ = this.products$.pipe(map(products => products.filter(product => product.categoryId === +categoryId)));
-    } else if (+categoryId === 0) {
-      this.filteredProducts$ = this.products$;
-    }
+    this.filteredProducts$ = this.products$.pipe(
+      map(products =>
+        products.filter(product => categoryId ? product.categoryId === +categoryId : true)
+      )
+    );
   }
 }
