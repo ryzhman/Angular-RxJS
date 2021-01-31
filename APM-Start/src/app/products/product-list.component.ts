@@ -4,7 +4,8 @@ import {EMPTY, Observable, Subject, Subscription} from 'rxjs';
 
 import {Product} from './product';
 import {ProductService} from './product.service';
-import {catchError} from "rxjs/operators";
+import {catchError, map} from 'rxjs/operators';
+import {ProductCategoryService} from '../product-categories/product-category.service';
 
 @Component({
   templateUrl: './product-list.component.html',
@@ -16,7 +17,7 @@ export class ProductListComponent {
   pageTitle = 'Product List';
   private errorMessageSubject: Subject<string> = new Subject<string>();
   errorMessage = this.errorMessageSubject.asObservable();
-  categories;
+  categories$ = this.categoryService.getAll();
 
   sub: Subscription;
   // $ for marking it is an Observable
@@ -29,8 +30,10 @@ export class ProductListComponent {
         //     // otherwise, the error is propagated to the template
         return EMPTY;
       }));
+  private filteredProducts$: Observable<Product[]>;
 
-  constructor(private productService: ProductService) {
+  constructor(private productService: ProductService, private categoryService: ProductCategoryService) {
+    this.filteredProducts$ = this.products$;
   }
 
   onAdd(): void {
@@ -38,6 +41,10 @@ export class ProductListComponent {
   }
 
   onSelected(categoryId: string): void {
-    console.log('Not yet implemented');
+    if (+categoryId > 0) {
+      this.filteredProducts$ = this.products$.pipe(map(products => products.filter(product => product.categoryId === +categoryId)));
+    } else if (+categoryId === 0) {
+      this.filteredProducts$ = this.products$;
+    }
   }
 }
