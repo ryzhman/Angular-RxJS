@@ -1,11 +1,11 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 
-import {EMPTY, Observable, Subject, Subscription} from 'rxjs';
+import {combineLatest, EMPTY, Observable, Subject} from 'rxjs';
 
 import {Product} from './product';
 import {ProductService} from './product.service';
-import {catchError, map} from 'rxjs/operators';
 import {ProductCategoryService} from '../product-categories/product-category.service';
+import {catchError, map, tap} from 'rxjs/operators';
 
 @Component({
   templateUrl: './product-list.component.html',
@@ -17,23 +17,31 @@ export class ProductListComponent {
   pageTitle = 'Product List';
   private errorMessageSubject: Subject<string> = new Subject<string>();
   errorMessage = this.errorMessageSubject.asObservable();
+  private categorySelectedSubject = new Subject<number>();
+  categorySelectionAction$ = this.categorySelectedSubject.asObservable();
   categories$ = this.categoryService.getAll();
 
-  sub: Subscription;
-  // $ for marking it is an Observable
-  products$: Observable<Product[]> = this.productService.productsWithCategories$
+// $ for marking it is an Observable
+  products$: Observable<Product[]> = combineLatest([
+    this.productService.productsWithCategories$,
+    this.categorySelectionAction$
+  ])
     .pipe(
-      catchError(error => {
-        //     // with onpush this change will not be picked up by component
-        this.errorMessageSubject.next(error);
-        //     // if error happened, we will return an empty observable
-        //     // otherwise, the error is propagated to the template
+      tap (item => console.log('Tap ' + item)),
+      // data that each stream emits - 1st is product, 2nd - categoryId
+      map(([products, categoryId]) =>
+        products.filter(item => categoryId ? item.categoryId === categoryId : true)
+      ),
+      tap(([products, selectedCategory]) => {
+        console.log(JSON.stringify(products));
+      }),
+      catchError(err => {
+        this.errorMessage = err;
         return EMPTY;
-      }));
-  private filteredProducts$: Observable<Product[]>;
+      })
+    );
 
   constructor(private productService: ProductService, private categoryService: ProductCategoryService) {
-    this.filteredProducts$ = this.products$;
   }
 
   onAdd(): void {
@@ -41,10 +49,11 @@ export class ProductListComponent {
   }
 
   onSelected(categoryId: string): void {
-    this.filteredProducts$ = this.products$.pipe(
-      map(products =>
-        products.filter(product => +categoryId ? product.categoryId === +categoryId : true)
-      )
-    );
+    this.categorySelectedSubject.next(+categoryId);
+    // this.filteredProducts$ = this.products$.pipe(
+    //   map(products =>
+    //     products.filter(product => +categoryId ? product.categoryId === +categoryId : true)
+    //   )
+    // );
   }
 }

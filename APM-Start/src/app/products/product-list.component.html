@@ -25,7 +25,7 @@
     <div class="table-responsive">
 <!--      `as` declares a local variable-->
       <table class="table mb-0"
-             *ngIf="filteredProducts$ | async as products">
+             *ngIf="products$ | async as products">
         <thead>
           <tr>
             <th>Product</th>
