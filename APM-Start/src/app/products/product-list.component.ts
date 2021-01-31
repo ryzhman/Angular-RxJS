@@ -43,7 +43,7 @@ export class ProductListComponent {
   onSelected(categoryId: string): void {
     this.filteredProducts$ = this.products$.pipe(
       map(products =>
-        products.filter(product => categoryId ? product.categoryId === +categoryId : true)
+        products.filter(product => +categoryId ? product.categoryId === +categoryId : true)
       )
     );
   }
