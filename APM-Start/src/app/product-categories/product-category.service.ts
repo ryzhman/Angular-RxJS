@@ -4,7 +4,7 @@ import {Injectable} from '@angular/core';
 import {Observable, throwError} from 'rxjs';
 
 import {ProductCategory} from './product-category';
-import {catchError} from 'rxjs/operators';
+import {catchError, shareReplay, tap} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -33,7 +33,10 @@ export class ProductCategoryService {
 
   getAll(): Observable<ProductCategory[]> {
     return this.http.get<ProductCategory[]>(this.productCategoriesUrl).pipe(
-      catchError(this.handleError)
+      tap(items => console.log('categories', JSON.stringify(items))),
+      // Observable returns the single even of ProductCategories[]
+      catchError(this.handleError),
+      shareReplay(1)
     );
   }
 }

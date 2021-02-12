@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 
 import {BehaviorSubject, combineLatest, forkJoin, merge, Observable, Subject, throwError} from 'rxjs';
-import {catchError, map, scan, tap} from 'rxjs/operators';
+import {catchError, map, scan, shareReplay, tap} from 'rxjs/operators';
 
 import {Product} from './product';
 import {SupplierService} from '../suppliers/supplier.service';
@@ -54,6 +54,9 @@ export class ProductService {
       scan((existingProducts: Product[], newProduct: Product) =>
         // using spread operator instead of add()
         [...existingProducts, newProduct]),
+      tap(items => console.log('productsWithAdd$', JSON.stringify(items))),
+      // caching the data, one event is cached for ever
+      shareReplay(1)
     );
 
   private productSelectedSubject = new BehaviorSubject<number>(0);
