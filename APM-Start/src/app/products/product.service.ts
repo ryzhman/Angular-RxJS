@@ -20,7 +20,7 @@ export class ProductService {
   }
 
   private productsUrl = 'api/products';
-  private suppliersUrl = this.supplierService.suppliersUrl;
+  suppliers$ = this.supplierService.suppliersWithMap$;
   categories$ = this.productCategoryService.getAll();
   products$ = this.http.get<Product[]>(this.productsUrl);
   // alternative solution
@@ -58,6 +58,9 @@ export class ProductService {
       // caching the data, one event is cached for ever
       shareReplay(1)
     );
+
+
+
 
   private productSelectedSubject = new BehaviorSubject<number>(0);
   productSelected$ = this.productSelectedSubject.asObservable();
