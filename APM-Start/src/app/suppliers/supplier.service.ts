@@ -3,7 +3,7 @@ import {HttpClient} from '@angular/common/http';
 
 import {Observable, of, throwError} from 'rxjs';
 import {Supplier} from "./supplier";
-import {concatMap, mergeMap, switchMap, tap} from "rxjs/operators";
+import {concatMap, mergeMap, tap} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +13,7 @@ export class SupplierService {
 
   suppliersWithMap$ = of(1, 5, 8)
     .pipe(
-      switchMap(id => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`)),
+      mergeMap(id => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`)),
       tap(item => console.log('Supplier: ', item))
     );
 
