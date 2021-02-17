@@ -59,15 +59,19 @@ export class ProductService {
       shareReplay(1)
     );
 
-
-
-
   private productSelectedSubject = new BehaviorSubject<number>(0);
   productSelected$ = this.productSelectedSubject.asObservable();
 
   selectedProduct$ = combineLatest([this.productsWithCategories$, this.productSelected$]).pipe(
     map(([products, productSelectedId]) =>
       products.find(item => item.id === productSelectedId))
+  );
+
+  selectedProductSupplier$ = combineLatest([
+    this.selectedProduct$,
+    this.supplierService.suppliers$
+  ]).pipe(
+    map(([product, suppliers]) => suppliers.filter(supplier => product.supplierIds.includes(supplier.id))),
   );
 
   publishSelectProductChange(selectedProductId: number): void {
