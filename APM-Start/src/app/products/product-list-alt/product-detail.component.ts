@@ -22,7 +22,7 @@ export class ProductDetailComponent {
       })
     );
 
-  productSuppliers$ = this.productService.selectedProductSupplier$
+  productSuppliers$ = this.productService.selectedProductSupplierViaId$
     .pipe(
       catchError(err => {
         this.errorMessage = err;
